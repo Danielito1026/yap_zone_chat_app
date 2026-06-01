@@ -5,9 +5,8 @@ import 'package:yap_zone/models/user.dart';
 
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String userId;
 
-  ChatService(this.userId);
+  ChatService();
 
   Future<List<UserModel>> getUsersByIds(List<String> uids) async {
     if (uids.isEmpty) return [];
@@ -36,14 +35,14 @@ class ChatService {
     return results.expand((list) => list).toList();
   }
 
-  
-
-  Stream<List<Chat>> watchUserChats() {
+  Stream<List<Chat>> watchUserChats(String userId) {
     return _firestore
         .collection('chats')
         .where('members', arrayContains: userId)
         .snapshots()
         .asyncMap((snapshot) async {
+          if (snapshot.docs.isEmpty) return [];
+
           final allUids = snapshot.docs
               .expand((doc) => List<String>.from(doc.data()['members'] ?? []))
               .toSet()
@@ -52,7 +51,7 @@ class ChatService {
           final users = await getUsersByIds(allUids);
           final userMap = {for (final u in users) u.uid: u};
 
-          return snapshot.docs.map((doc) {
+          final chats = snapshot.docs.map((doc) async {
             final data = doc.data();
             final memberIds = List<String>.from(data['members'] ?? []);
             final members = memberIds
@@ -60,14 +59,37 @@ class ChatService {
                 .whereType<UserModel>() // safely drop any unresolved UIDs
                 .toList();
 
+            final lastMessage = await getLastMessage(doc.id);
+
             return Chat.fromMap(
               uid: doc.id,
               currentUserId: userId,
               data: data,
               members: members,
+              messages: lastMessage != null ? [lastMessage] : [],
             );
           }).toList();
+
+          return Future.wait(chats);
         });
+  }
+
+  Future<ChatMessage?> getLastMessage(String chatId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+
+      return snapshot.docs.isNotEmpty
+          ? ChatMessage.fromMap(snapshot.docs.first.data())
+          : null;
+    } catch (e) {
+      return null;
+    }
   }
 
   Stream<List<ChatMessage>> watchChatMessages(String chatId) {
@@ -84,7 +106,6 @@ class ChatService {
                 .toList(),
           );
     } catch (e) {
-      print('Error watching chat messages: $e');
       return Stream.value([]);
     }
   }

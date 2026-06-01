@@ -65,18 +65,6 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           return;
         }
         await databaseService.updateUserActivity(result.credential!.user!.uid);
-
-        _showSnackBar(
-          icon: const Icon(Icons.check_circle),
-          text: Text(
-            'Welcome back, ${result.credential!.user!.email}!',
-            softWrap: true,
-            overflow: TextOverflow.visible,
-            textHeightBehavior: TextHeightBehavior(),
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.green,
-        );
       } else {
         if (_pickedImage == null) {
           _showSnackBar(
@@ -123,18 +111,6 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           _emailAddress,
           _username,
           userImageUrl,
-        );
-
-        _showSnackBar(
-          icon: const Icon(Icons.check_circle),
-          text: Text(
-            'Welcome, ${result.credential!.user!.email}!',
-            softWrap: true,
-            overflow: TextOverflow.visible,
-            textHeightBehavior: TextHeightBehavior(),
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.green,
         );
       }
     } catch (e) {
@@ -301,9 +277,13 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       ? null
                       : () {
                           if (widget.authMode == AuthMode.signIn) {
-                            navigation.pushAndRemoveUntilFirst(AuthPage(authMode: AuthMode.signUp));
+                            navigation.pushAndRemoveUntilFirst(
+                              AuthPage(authMode: AuthMode.signUp),
+                            );
                           } else {
-                            navigation.pushAndRemoveUntilFirst(AuthPage(authMode: AuthMode.signIn));
+                            navigation.pushAndRemoveUntilFirst(
+                              AuthPage(authMode: AuthMode.signIn),
+                            );
                           }
                         },
                   child: Text(
