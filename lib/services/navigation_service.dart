@@ -41,6 +41,17 @@ class NavigationService {
     );
   }
 
+  Future<void> pushAndRemoveUntilFirst(Widget page) async {
+    await navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => page),
+      (route) => route.isFirst,
+    );
+  }
+
+  void popUntilFirst() {
+    navigatorKey.currentState?.popUntil((route) => route.isFirst);
+  }
+
   void goBack() {
     navigatorKey.currentState?.pop();
   }

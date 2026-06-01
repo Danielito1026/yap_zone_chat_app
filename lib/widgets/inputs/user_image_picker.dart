@@ -19,7 +19,9 @@ class _UserImagePickerState extends ConsumerState<UserImagePicker> {
   void _pickImage() async {
     final pickedFile = await ref.read(mediaServiceProvider).pickImage();
     if (pickedFile == null) return;
-    setState(() => _pickedImage = File(pickedFile.path!));
+    final image = File(pickedFile.path!);
+    setState(() => _pickedImage = image);
+    widget.onPickImage(image);
   }
 
   @override

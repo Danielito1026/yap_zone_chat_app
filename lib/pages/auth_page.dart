@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yap_zone/providers/auth_provider.dart';
+import 'package:yap_zone/providers/cloud_storage_provider.dart';
+import 'package:yap_zone/providers/database_provider.dart';
 import 'package:yap_zone/providers/navigator_provider.dart';
 import 'package:yap_zone/widgets/app_snackbar.dart';
 import 'package:yap_zone/widgets/hero_logo.dart';
@@ -42,11 +44,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
     final authService = ref.read(authServiceProvider);
-
+    final databaseService = ref.read(databaseServiceProvider);
     try {
       if (widget.authMode == AuthMode.signIn) {
         // Call sign in method
         final result = await authService.signIn(_emailAddress, _password);
+
         if (result.error != null) {
           _showSnackBar(
             icon: const Icon(Icons.error),
@@ -59,14 +62,97 @@ class _AuthPageState extends ConsumerState<AuthPage> {
             ),
             backgroundColor: Colors.red,
           );
+          return;
         }
+        await databaseService.updateUserActivity(result.credential!.user!.uid);
+
+        _showSnackBar(
+          icon: const Icon(Icons.check_circle),
+          text: Text(
+            'Welcome back, ${result.credential!.user!.email}!',
+            softWrap: true,
+            overflow: TextOverflow.visible,
+            textHeightBehavior: TextHeightBehavior(),
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.green,
+        );
       } else {
+        if (_pickedImage == null) {
+          _showSnackBar(
+            icon: const Icon(Icons.error),
+            text: const Text(
+              'Please select an image',
+              softWrap: true,
+              overflow: TextOverflow.visible,
+              textHeightBehavior: TextHeightBehavior(),
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+          );
+          return;
+        }
         // Call sign up method
-        // await authService.signUp(_emailAddress, _password);
+        final result = await authService.signUp(
+          email: _emailAddress,
+          username: _username,
+          password: _password,
+        );
+
+        if (result.error != null) {
+          _showSnackBar(
+            icon: const Icon(Icons.error),
+            text: Text(
+              result.error!,
+              softWrap: true,
+              overflow: TextOverflow.visible,
+              textHeightBehavior: TextHeightBehavior(),
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+          );
+          return;
+        }
+
+        final userImageUrl = await ref
+            .read(cloudStorageServiceProvider)
+            .uploadUserImage(result.credential!.user!.uid, _pickedImage!);
+
+        await databaseService.saveUserData(
+          result.credential!.user!.uid,
+          _emailAddress,
+          _username,
+          userImageUrl,
+        );
+
+        _showSnackBar(
+          icon: const Icon(Icons.check_circle),
+          text: Text(
+            'Welcome, ${result.credential!.user!.email}!',
+            softWrap: true,
+            overflow: TextOverflow.visible,
+            textHeightBehavior: TextHeightBehavior(),
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.green,
+        );
       }
+    } catch (e) {
+      _showSnackBar(
+        icon: const Icon(Icons.error),
+        text: Text(
+          e.toString(),
+          softWrap: true,
+          overflow: TextOverflow.visible,
+          textHeightBehavior: TextHeightBehavior(),
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red,
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
+        ref.read(navigationServiceProvider).popUntilFirst();
       }
     }
   }
@@ -115,7 +201,10 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                 HeroLogo(),
                 const SizedBox(height: 32),
                 if (widget.authMode == AuthMode.signUp) ...[
-                  UserImagePicker(onPickImage: (image) => _pickedImage = image),
+                  UserImagePicker(
+                    onPickImage: (image) =>
+                        setState(() => _pickedImage = image),
+                  ),
                   InputFormField(
                     labelText: 'Username',
                     prefixIcon: const Icon(Icons.person),
@@ -129,7 +218,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       }
                       return null;
                     },
-                    onSaved: (value) => _username = value ?? '',
+                    onSaved: (value) => setState(() => _username = value ?? ''),
                   ),
                 ],
                 InputFormField(
@@ -147,12 +236,14 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     }
                     return null;
                   },
-                  onSaved: (value) => _emailAddress = value ?? '',
+                  onSaved: (value) =>
+                      setState(() => _emailAddress = value ?? ''),
                 ),
                 InputFormField(
                   labelText: 'Password',
                   prefixIcon: const Icon(Icons.lock),
                   isPasswordField: true,
+                  onChanged: (value) => setState(() => _password = value),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
@@ -162,7 +253,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     }
                     return null;
                   },
-                  onSaved: (value) => _password = value ?? '',
+                  onSaved: (value) => setState(() => _password = value ?? ''),
                 ),
                 if (widget.authMode == AuthMode.signUp)
                   InputFormField(
@@ -178,7 +269,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       }
                       return null;
                     },
-                    onSaved: (value) => _confirmPassword = value ?? '',
+                    onSaved: (value) =>
+                        setState(() => _confirmPassword = value ?? ''),
                   ),
                 const SizedBox(height: 24),
                 FilledButton(
@@ -209,13 +301,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       ? null
                       : () {
                           if (widget.authMode == AuthMode.signIn) {
-                            navigation.navigateToPage(
-                              AuthPage(authMode: AuthMode.signUp),
-                            );
+                            navigation.pushAndRemoveUntilFirst(AuthPage(authMode: AuthMode.signUp));
                           } else {
-                            navigation.navigateToPage(
-                              AuthPage(authMode: AuthMode.signIn),
-                            );
+                            navigation.pushAndRemoveUntilFirst(AuthPage(authMode: AuthMode.signIn));
                           }
                         },
                   child: Text(

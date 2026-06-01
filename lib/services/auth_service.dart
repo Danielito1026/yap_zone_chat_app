@@ -1,12 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:yap_zone/routes/router.dart';
-import 'package:yap_zone/services/navigation_service.dart';
 
 class AuthService {
-  final NavigationService _nav;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  AuthService(this._nav);
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
@@ -29,11 +24,11 @@ class AuthService {
     }
   }
 
-  Future<({UserCredential? credential, String? error})> signUp(
-    String email,
-    String username,
-    String password,
-  ) async {
+  Future<({UserCredential? credential, String? error})> signUp({
+    required String email,
+    required String username,
+    required String password,
+  }) async {
     try {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
@@ -76,6 +71,5 @@ class AuthService {
 
   Future<void> signOut() async {
     await _auth.signOut();
-    await _nav.navigateToRoute(AppRoutes.signIn);
   }
 }

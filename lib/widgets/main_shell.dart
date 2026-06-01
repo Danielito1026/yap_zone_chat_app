@@ -11,11 +11,9 @@ final shellIndexProvider = StateProvider<int>((ref) => 0);
 class MainShell extends ConsumerWidget {
   const MainShell({super.key});
 
-  static const _pages = [
-    ChatListPage(),
-    UsersListPage(),
-    ProfilePage()
-  ];
+  static const _pageTitles = ['Chats', 'Users', 'Profile'];
+
+  static const _pages = [ChatListPage(), UsersListPage(), ProfilePage()];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +21,10 @@ class MainShell extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: Text(
+          _pageTitles[currentIndex],
+          style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -32,14 +33,13 @@ class MainShell extends ConsumerWidget {
             icon: Icon(Icons.logout),
           ),
         ],
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
-      body: IndexedStack(
-        index: currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: currentIndex, children: _pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
-        onDestinationSelected: (index) => ref.read(shellIndexProvider.notifier).state = index,
+        onDestinationSelected: (index) =>
+            ref.read(shellIndexProvider.notifier).state = index,
         destinations: const [
           NavigationDestination(icon: Icon(Icons.chat), label: 'Chats'),
           NavigationDestination(icon: Icon(Icons.people), label: 'Users'),

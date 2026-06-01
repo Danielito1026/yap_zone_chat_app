@@ -59,12 +59,6 @@ class MyApp extends ConsumerWidget {
           labelSmall: TextStyle(fontVariations: [FontVariation('wght', 400)]),
         ),
         colorSchemeSeed: const Color.fromARGB(255, 36, 35, 49),
-        scaffoldBackgroundColor: const Color.fromARGB(255, 36, 35, 49),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: const Color.fromARGB(255, 30, 29, 37),
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.grey[600],
-        ),
         brightness: Brightness.dark,
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
