@@ -14,8 +14,6 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-
-
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
@@ -27,8 +25,10 @@ class MyApp extends ConsumerWidget {
       navigatorKey: navigatorKey,
       routes: {
         AppRoutes.splash: (context) => const SplashPage(),
-        AppRoutes.signIn: (context) => const AuthPage(authMode: AuthMode.signIn),
-        AppRoutes.signUp: (context) => const AuthPage(authMode: AuthMode.signUp),
+        AppRoutes.signIn: (context) =>
+            const AuthPage(authMode: AuthMode.signIn),
+        AppRoutes.signUp: (context) =>
+            const AuthPage(authMode: AuthMode.signUp),
       },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

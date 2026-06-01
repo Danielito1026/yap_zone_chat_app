@@ -47,4 +47,22 @@ class Chat {
       messages: messages ?? [],
     );
   }
+
+  Chat copyWith({
+    String? uid,
+    String? currentUserId,
+    bool? isActive,
+    bool? isGroupChat,
+    List<UserModel>? members,
+    List<ChatMessage>? messages,
+  }) {
+    return Chat(
+      uid: uid ?? this.uid,
+      currentUserId: currentUserId ?? this.currentUserId,
+      isActive: isActive ?? this.isActive,
+      isGroupChat: isGroupChat ?? this.isGroupChat,
+      members: members ?? this.members,
+      messages: messages ?? this.messages,
+    );
+  }
 }
