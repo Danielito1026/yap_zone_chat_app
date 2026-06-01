@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
 class UserModel {
@@ -25,22 +26,37 @@ class UserModel {
       'uid': uid,
       'username': username,
       'email': email,
-      'imageUrl': imageUrl,
-      'lastActive': lastActive,
+      'image': imageUrl,
+      'last_active': lastActive,
     };
   }
 
   factory UserModel.fromMap(String uid, Map<String, dynamic> map) {
+    // Handle Timestamp conversion
+    DateTime? parseTimestamp(dynamic value) {
+      if (value == null) return null;
+      if (value is DateTime) return value;
+      // If it's a Firestore Timestamp object
+      if (value is Timestamp) return value.toDate();
+      // If it's a Map (rare case)
+      if (value is Map) {
+        return DateTime.fromMillisecondsSinceEpoch(
+          (value['seconds'] ?? 0) * 1000 +
+              (value['nanoseconds'] ?? 0) ~/ 1000000,
+        );
+      }
+      return null;
+    }
+
     return UserModel(
       uid: uid,
-      name: map['username'] as String? ?? '',
+      name: map['name'] as String? ?? '',
       username: map['username'] as String? ?? '',
       email: map['email'] as String? ?? '',
-      imageUrl: map['imageUrl'] as String? ?? '',
-      lastActive: map['lastActive'] as DateTime? ?? DateTime.now(),
+      imageUrl: map['image'] as String? ?? '',
+      lastActive: parseTimestamp(map['last_active']) ?? DateTime.now(),
     );
   }
-
   UserModel copyWith({
     String? name,
     String? username,
