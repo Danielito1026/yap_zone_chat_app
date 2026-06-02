@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:yap_zone/constants/constants.dart';
 import 'package:yap_zone/models/chat.dart';
 import 'package:yap_zone/models/chat_message.dart';
 import 'package:yap_zone/models/user.dart';
@@ -37,7 +38,7 @@ class ChatService {
 
   Stream<List<Chat>> watchUserChats(String userId) {
     return _firestore
-        .collection('chats')
+        .collection(Constants.chatsCollection)
         .where('members', arrayContains: userId)
         .snapshots()
         .asyncMap((snapshot) async {
@@ -77,9 +78,9 @@ class ChatService {
   Future<ChatMessage?> getLastMessage(String chatId) async {
     try {
       final snapshot = await _firestore
-          .collection('chats')
+          .collection(Constants.chatsCollection)
           .doc(chatId)
-          .collection('messages')
+          .collection(Constants.messagesCollection)
           .orderBy('timestamp', descending: true)
           .limit(1)
           .get();
@@ -92,12 +93,12 @@ class ChatService {
     }
   }
 
-  Stream<List<ChatMessage>> watchChatMessages(String chatId) {
+  Stream<List<ChatMessage>> watchChatMessages(String chatId)  {
     try {
-      return _firestore
-          .collection('chats')
+      return  _firestore
+          .collection(Constants.chatsCollection)
           .doc(chatId)
-          .collection('messages')
+          .collection(Constants.messagesCollection)
           .orderBy('timestamp', descending: true)
           .snapshots()
           .map(
@@ -110,12 +111,62 @@ class ChatService {
     }
   }
 
-  Future<void> createChat(List<String> memberIds, bool isGroupChat) async {
+  Future<void> createChat(List<String> memberIds) async {
     final chatData = {
       'members': memberIds,
-      'isGroupChat': isGroupChat,
-      'timestamp': DateTime.now(),
+      'is_activity': false,
+      'is_group': memberIds.length > 2,
+      'last_updated': DateTime.now(),
     };
-    await _firestore.collection('chats').add(chatData);
+    await _firestore.collection(Constants.chatsCollection).add(chatData);
+  }
+
+  Future<void> sendMessage(String chatId, ChatMessage message) async {
+    // todo: make send message service function
+    try {
+      await _firestore
+          .collection(Constants.chatsCollection)
+          .doc(chatId)
+          .collection(Constants.messagesCollection)
+          .add(message.toMap());
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> sendMessageImage(String chatId, String messageId, ChatMessage message) async {
+    // todo: make send message service function
+    try {
+      await _firestore
+          .collection(Constants.chatsCollection)
+          .doc(chatId)
+          .collection(Constants.messagesCollection)
+          .doc(messageId)
+          .set(message.toMap());
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> updateChatData(String chatId, Map<String, dynamic> data) async {
+    try {
+      await _firestore
+          .collection(Constants.chatsCollection)
+          .doc(chatId)
+          .update(data);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> deleteChat(String chatId) async {
+    try {
+      await _firestore
+          .collection(Constants.chatsCollection)
+          .doc(chatId)
+          .delete();
+    } catch (e) {
+      print(e);
+    }
   }
 }

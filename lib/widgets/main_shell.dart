@@ -33,7 +33,7 @@ class MainShell extends ConsumerWidget {
             icon: Icon(Icons.logout),
           ),
         ],
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: const Color.fromARGB(255, 20, 20, 24),
       ),
       body: IndexedStack(index: currentIndex, children: _pages),
       bottomNavigationBar: NavigationBar(

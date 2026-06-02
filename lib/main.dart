@@ -60,6 +60,7 @@ class MyApp extends ConsumerWidget {
         ),
         colorSchemeSeed: const Color.fromARGB(255, 36, 35, 49),
         brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color.fromARGB(255, 20, 20, 24),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color.fromARGB(255, 30, 29, 37),
