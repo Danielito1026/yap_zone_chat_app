@@ -15,7 +15,7 @@ class _ChatListPageState extends ConsumerState<ChatListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userChatsAsync =  ref.watch(userChatsProvider);
+    final userChatsAsync =  ref.watch(userChatsV2Provider);
     return userChatsAsync.when(
       data: (chats) {
         if (chats.isEmpty) {
@@ -24,7 +24,7 @@ class _ChatListPageState extends ConsumerState<ChatListPage> {
         return ChatListView(chats: chats);
       },
       loading: () => Center(child: CircularProgressIndicator()),
-      error: (e, st) => Center(child: Text('Error loading chats')),
+      error: (e, st) => Center(child: Text('Error loading chats:\n$e')),
     );
   }
 }

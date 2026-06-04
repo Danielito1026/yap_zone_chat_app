@@ -12,6 +12,12 @@ final chatServiceProvider = Provider<ChatService>((ref) {
   return ChatService();
 });
 
+final chatServiceV2Provider = Provider<ChatServiceV2>((ref) {
+  final user = ref.watch(currentUserProvider).value;
+
+  return ChatServiceV2(user!);
+});
+
 final userChatsProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
   final user = ref.watch(currentUserProvider).value;
 
@@ -19,9 +25,21 @@ final userChatsProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
   return ref.watch(chatServiceProvider).watchUserChats(user.uid);
 });
 
+final userChatsV2Provider = StreamProvider.autoDispose<List<Chat>>((ref) {
+  final user = ref.watch(currentUserProvider).value;
+
+  if (user == null) return Stream.value([]);
+  return ref.watch(chatServiceV2Provider).watchUserChats(user.uid);
+});
+
 final messagesProvider = StreamProvider.family
     .autoDispose<List<ChatMessage>, String>((ref, chatId) {
       return ref.watch(chatServiceProvider).watchChatMessages(chatId);
+    });
+
+final messagesV2Provider = StreamProvider.family
+    .autoDispose<List<ChatMessage>, String>((ref, chatId) {
+      return ref.watch(chatServiceV2Provider).watchChatMessages(chatId);
     });
 
 class ChatActionNotifier extends AsyncNotifier<void> {

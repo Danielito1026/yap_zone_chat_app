@@ -25,11 +25,17 @@ class _UsersListPageState extends ConsumerState<UsersListPage> {
           // Expanded(child: UserListView(users: users)),
           userAsync.when(
             data: (users) {
-              if (users.isEmpty)
+              if (users.isEmpty) {
                 return Center(child: Text('No users around...'));
+              }
               return UserListView(users: users);
             },
-            error: (e, st) => Center(child: Text('Some Error occurred: ${e.toString()}',softWrap: true,)),
+            error: (e, st) => Center(
+              child: Text(
+                'Some Error occurred: ${e.toString()}',
+                softWrap: true,
+              ),
+            ),
             loading: () => CircularProgressIndicator(),
           ),
         ],

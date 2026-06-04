@@ -1,25 +1,53 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yap_zone/constants/constants.dart';
 import 'package:yap_zone/models/user.dart';
+import 'package:yap_zone/services/database_service.dart';
 
 class UserService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final GenericDatabaseService<UserModel> _dbService;
+
+  UserService() {
+    _dbService = GenericDatabaseService<UserModel>(
+      collectionName: Constants.usersCollection,
+      fromMap: (id, data) => UserModel.fromMap(id, data),
+      toMap: (user) => user.toMap(),
+    );
+  }
 
   Future<List<UserModel>> fetchAllUsers(UserModel user) async {
-    final result = await _firestore
-        .collection(Constants.usersCollection)
-        .where('email', isNotEqualTo: user.email)
-        .get()
-        .then(
-          (snap) => snap.docs
-              .map((doc) => UserModel.fromMap(doc.id, doc.data()))
-              .toList(),
-        );
+    final users = await _dbService.getDocumentsWhere(
+      field: 'email',
+      isNotEqualTo: user.email,
+    );
+    return users;
+  }
 
-    result.forEach((user){
-      print(user.email);
-    });
+  Future<UserModel?> getUserById(String uid) async {
+    return await _dbService.getDocument(uid);
+  }
 
-    return result;
+  Stream<UserModel?> watchUser(String uid) {
+    return _dbService.watchDocument(uid);
+  }
+
+  Future<void> saveUserData(
+    String uid,
+    String email,
+    String username,
+    String imageUrl,
+  ) async {
+    await _dbService.setDocument(
+      uid,
+      UserModel(
+        name: username,
+        username: username,
+        email: email,
+        imageUrl: imageUrl,
+      ),
+    );
+  }
+
+
+  Future<void> updateUserActivity(String uid) async {
+    await _dbService.updateDocument(uid, {'last_active': DateTime.now(),});
   }
 }

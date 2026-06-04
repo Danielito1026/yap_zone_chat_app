@@ -25,8 +25,6 @@ class ChatMessagesListView extends StatelessWidget {
             ? messages[index + 1]
             : null;
 
-        final prevMessage = index - 1 >  1? messages[index - 1] : null; 
-
         // get sender user data
         final senderData = chat.members.firstWhere(
           (user) => user.uid == message.senderId,
@@ -36,15 +34,6 @@ class ChatMessagesListView extends StatelessWidget {
         final currentMessageUserId = message.senderId;
         // get next message sender id
         final nextMessageUserId = nextMessage?.senderId;
-        final prevMessageUserId = prevMessage?.senderId;
-
-
-        // user 1 
-        // user 1
-        // user 1
-        
-        // chat bubble first: display time if next message sender id is not equally to current message sender id
-        // chat bubble next: display time if next message sender id != current message && prev message sender id == current message sender id
 
         // if next message is not null use the message bubble next
         final nextUserIsSame = currentMessageUserId == nextMessageUserId;
@@ -55,7 +44,6 @@ class ChatMessagesListView extends StatelessWidget {
             message: message.content,
             isMe: message.senderId == chat.currentUserId,
             sendTime: message.timestamp,
-            showSendTime: prevMessageUserId != currentMessageUserId,
           );
         }
         return ChatMessageBubble.first(
@@ -65,7 +53,6 @@ class ChatMessagesListView extends StatelessWidget {
           message: message.content,
           isMe: message.senderId == chat.currentUserId,
           sendTime: message.timestamp,
-          showSendTime: !nextUserIsSame,
         );
       },
     );

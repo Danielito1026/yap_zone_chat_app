@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import 'package:yap_zone/models/chat_message.dart';
 import 'package:yap_zone/models/user.dart';
 
@@ -6,19 +7,22 @@ class Chat {
   final String currentUserId;
   final bool isActive;
   final bool isGroupChat;
-  final List<UserModel> members;
+  List<String> membersId;
+  List<UserModel> members;
   List<ChatMessage> messages;
   late final List<UserModel> _recipients;
 
   Chat({
-    required this.uid,
-    required this.currentUserId,
+    String? uid,
+    String? currentUserId,
     required this.isActive,
     required this.isGroupChat,
-    required this.members,
-    required this.messages,
-  }) {
-    _recipients = members.where((user) => user.uid != currentUserId).toList();
+    this.membersId = const [],
+    this.members = const [],
+    this.messages = const [],
+  }) : uid = uid ?? Uuid().v4(),
+       currentUserId = currentUserId ?? '' {
+    _recipients =  members.where((user) => user.uid != currentUserId).toList();
   }
 
   List<UserModel> get recipients => _recipients;
@@ -31,11 +35,10 @@ class Chat {
       ? 'assets/images/group-chat-logo.png'
       : recipients.first.imageUrl;
 
-  factory Chat.fromMap({
-    required String uid,
+  factory Chat.fromMap(
+    String uid, {
     required String currentUserId,
     required Map<String, dynamic> data,
-    required List<UserModel> members,
     List<ChatMessage>? messages,
   }) {
     return Chat(
@@ -43,9 +46,17 @@ class Chat {
       currentUserId: currentUserId,
       isActive: data['is_activity'] as bool? ?? false,
       isGroupChat: data['is_group'] as bool? ?? false,
-      members: members,
+      membersId: List<String>.from(data['members'] ?? []),
       messages: messages ?? [],
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'is_group': isGroupChat,
+      'is_activity': isActive,
+      'members': membersId,
+    };
   }
 
   Chat copyWith({

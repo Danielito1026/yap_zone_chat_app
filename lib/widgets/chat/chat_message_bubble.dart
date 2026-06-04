@@ -14,7 +14,7 @@ class ChatMessageBubble extends StatelessWidget {
     required this.message,
     required this.isMe,
     required this.sendTime,
-    required this.showSendTime,
+     this.showSendTime= true,
   }) : isFirstInSequence = true;
 
   // Create a amessage bubble that continues the sequence.
@@ -24,7 +24,7 @@ class ChatMessageBubble extends StatelessWidget {
     required this.message,
     required this.isMe,
     required this.sendTime,
-    required this.showSendTime,
+     this.showSendTime = true,
   }) : isFirstInSequence = false,
        userImage = null,
        username = null;
