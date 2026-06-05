@@ -73,6 +73,8 @@ class _ChatMessageBarState extends ConsumerState<ChatMessageBar> {
       }
 
       await chatAction.sendMessageText(widget.chatId, message);
+    } catch (e) {
+      print(e);
     } finally {
       setState(() {
         isSending = false;

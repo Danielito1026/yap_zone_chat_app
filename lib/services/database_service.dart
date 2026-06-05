@@ -44,7 +44,7 @@ class DatabaseService {
 class GenericDatabaseService<T> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String collectionName;
-
+  final String? subcollectionName;
   final T Function(String id, Map<String, dynamic> data) fromMap;
 
   final Map<String, dynamic> Function(T model) toMap;
@@ -53,6 +53,7 @@ class GenericDatabaseService<T> {
     required this.collectionName,
     required this.fromMap,
     required this.toMap,
+    this.subcollectionName,
   });
 
   Future<T?> getDocument(String docId) async {
@@ -297,6 +298,23 @@ class GenericDatabaseService<T> {
     try {
       final docRef = await _firestore
           .collection(collectionName)
+          .add(toMap(model));
+      return docRef.id;
+    } catch (e) {
+      print('Error adding document: $e');
+      return null;
+    }
+  }
+
+  Future<String?> addDocumentToSubcollection(
+    String parentDocId,
+    T model,
+  ) async {
+    try {
+      final docRef = await _firestore
+          .collection(collectionName)
+          .doc(parentDocId)
+          .collection(subcollectionName!)
           .add(toMap(model));
       return docRef.id;
     } catch (e) {

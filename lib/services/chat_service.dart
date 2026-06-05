@@ -290,13 +290,18 @@ class ChatServiceV2 {
   }
 
   Future<void> sendMessage(String chatId, ChatMessage message) async {
-    final messageService = GenericDatabaseService<ChatMessage>(
-      collectionName: Constants.messagesCollection,
-      fromMap: (id, data) => ChatMessage.fromMap(data),
-      toMap: (msg) => msg.toMap(),
-    );
+    try {
+      final messageService = GenericDatabaseService<ChatMessage>(
+        collectionName: Constants.chatsCollection,
+        subcollectionName: Constants.messagesCollection,
+        fromMap: (id, data) => ChatMessage.fromMap(data),
+        toMap: (msg) => msg.toMap(),
+      );
 
-    await messageService.addDocument(message);
+      await messageService.addDocumentToSubcollection(chatId,message);
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> sendMessageImage(

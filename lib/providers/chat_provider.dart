@@ -7,7 +7,6 @@ import 'package:yap_zone/providers/auth_provider.dart';
 import 'package:yap_zone/providers/cloud_storage_provider.dart';
 import 'package:yap_zone/services/chat_service.dart';
 
-
 final chatServiceProvider = Provider<ChatService>((ref) {
   return ChatService();
 });
@@ -47,15 +46,19 @@ class ChatActionNotifier extends AsyncNotifier<void> {
   Future<void> build() async {}
 
   Future<void> sendMessageText(String chatId, String messageText) async {
-    final user = ref.read(currentUserProvider).value;
+    try {
+      final user = ref.read(currentUserProvider).value;
 
-    final message = ChatMessage(
-      senderId: user!.uid,
-      content: messageText,
-      type: MessageType.text,
-      timestamp: DateTime.now(),
-    );
-    await ref.read(chatServiceProvider).sendMessage(chatId, message);
+      final message = ChatMessage(
+        senderId: user!.uid,
+        content: messageText,
+        type: MessageType.text,
+        timestamp: DateTime.now(),
+      );
+      await ref.read(chatServiceV2Provider).sendMessage(chatId, message);
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> sendMessageImage(String chatId, File image) async {
@@ -73,7 +76,7 @@ class ChatActionNotifier extends AsyncNotifier<void> {
     );
 
     await ref
-        .read(chatServiceProvider)
+        .read(chatServiceV2Provider)
         .sendMessageImage(chatId, result.messageId, message);
   }
 
@@ -86,13 +89,13 @@ class ChatActionNotifier extends AsyncNotifier<void> {
         .where((member) => member.uid != user.uid)
         .map((member) => member.uid)
         .toList();
-    await ref.read(chatServiceProvider).updateChatData(chat.uid, {
+    await ref.read(chatServiceV2Provider).updateChatData(chat.uid, {
       'members': updatedMemberUIDs,
     });
   }
 
   Future<void> deleteChat(String chatId) async {
-    await ref.read(chatServiceProvider).deleteChat(chatId);
+    await ref.read(chatServiceV2Provider).deleteChat(chatId);
   }
 }
 
