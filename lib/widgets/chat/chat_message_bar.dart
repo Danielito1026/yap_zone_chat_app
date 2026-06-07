@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yap_zone/providers/chat_provider.dart';
 import 'package:yap_zone/providers/media_provider.dart';
 
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'dart:async';
+
 class ChatMessageBar extends ConsumerStatefulWidget {
   const ChatMessageBar({super.key, required this.chatId});
 
@@ -15,6 +18,7 @@ class ChatMessageBar extends ConsumerStatefulWidget {
 }
 
 class _ChatMessageBarState extends ConsumerState<ChatMessageBar> {
+  late StreamSubscription<bool> keyboardSubscription;
   late double _deviceHeight;
   late double _deviceWidth;
 
@@ -24,8 +28,23 @@ class _ChatMessageBarState extends ConsumerState<ChatMessageBar> {
   bool isSending = false;
 
   @override
+  void initState() {
+    super.initState();
+    var keyboardVisibilityController = KeyboardVisibilityController();
+    // Subscribe
+    keyboardSubscription = keyboardVisibilityController.onChange.listen((
+      bool visible,
+    ) {
+      ref
+          .read(chatActionProvider.notifier)
+          .updateChatActivityStatus(widget.chatId, visible);
+    });
+  }
+
+  @override
   void dispose() {
     super.dispose();
+    keyboardSubscription.cancel();
     _messageEditingController.dispose();
     _deleteTempImage();
   }
@@ -114,6 +133,9 @@ class _ChatMessageBarState extends ConsumerState<ChatMessageBar> {
                     textCapitalization: TextCapitalization.sentences,
                     autocorrect: true,
                     enableSuggestions: true,
+                    onChanged: (value) {
+                      ref.read(chatActionProvider.notifier);
+                    },
                     decoration: InputDecoration(
                       hint: Text('Type a message'),
                       fillColor: Theme.of(

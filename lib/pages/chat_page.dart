@@ -51,7 +51,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final messagesAsync = ref.watch(messagesProvider(widget.chat.uid));
+    final messagesAsync = ref.watch(messagesV2Provider(widget.chat.uid));
 
     return Scaffold(
       appBar: AppBar(
@@ -74,7 +74,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           ],
         ),
         actions: [
-          IconButton(onPressed: _onLeaveChat, icon: Icon(Icons.directions_walk )),
+          IconButton(
+            onPressed: _onLeaveChat,
+            icon: Icon(Icons.directions_walk),
+          ),
         ],
       ),
       body: Column(

@@ -3,10 +3,10 @@ import 'package:yap_zone/models/user.dart';
 import 'package:yap_zone/services/database_service.dart';
 
 class UserService {
-  late final GenericDatabaseService<UserModel> _dbService;
+  late final DatabaseService<UserModel> _dbService;
 
   UserService() {
-    _dbService = GenericDatabaseService<UserModel>(
+    _dbService = DatabaseService<UserModel>(
       collectionName: Constants.usersCollection,
       fromMap: (id, data) => UserModel.fromMap(id, data),
       toMap: (user) => user.toMap(),
@@ -46,8 +46,7 @@ class UserService {
     );
   }
 
-
   Future<void> updateUserActivity(String uid) async {
-    await _dbService.updateDocument(uid, {'last_active': DateTime.now(),});
+    await _dbService.updateDocument(uid, {'last_active': DateTime.now()});
   }
 }

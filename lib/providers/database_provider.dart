@@ -1,4 +1,0 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yap_zone/services/database_service.dart';
-
-final databaseServiceProvider = Provider<DatabaseService>((ref) => DatabaseService());

@@ -7,21 +7,10 @@ import 'package:yap_zone/providers/auth_provider.dart';
 import 'package:yap_zone/providers/cloud_storage_provider.dart';
 import 'package:yap_zone/services/chat_service.dart';
 
-final chatServiceProvider = Provider<ChatService>((ref) {
-  return ChatService();
-});
-
 final chatServiceV2Provider = Provider<ChatServiceV2>((ref) {
   final user = ref.watch(currentUserProvider).value;
 
   return ChatServiceV2(user!);
-});
-
-final userChatsProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
-  final user = ref.watch(currentUserProvider).value;
-
-  if (user == null) return Stream.value([]);
-  return ref.watch(chatServiceProvider).watchUserChats(user.uid);
 });
 
 final userChatsV2Provider = StreamProvider.autoDispose<List<Chat>>((ref) {
@@ -31,11 +20,6 @@ final userChatsV2Provider = StreamProvider.autoDispose<List<Chat>>((ref) {
   return ref.watch(chatServiceV2Provider).watchUserChats(user.uid);
 });
 
-final messagesProvider = StreamProvider.family
-    .autoDispose<List<ChatMessage>, String>((ref, chatId) {
-      return ref.watch(chatServiceProvider).watchChatMessages(chatId);
-    });
-
 final messagesV2Provider = StreamProvider.family
     .autoDispose<List<ChatMessage>, String>((ref, chatId) {
       return ref.watch(chatServiceV2Provider).watchChatMessages(chatId);
@@ -44,6 +28,12 @@ final messagesV2Provider = StreamProvider.family
 class ChatActionNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
+
+  Future<void> updateChatActivityStatus(String chatId, bool value) async {
+    await ref.read(chatServiceV2Provider).updateChatData(chatId, {
+      'is_activity': value,
+    });
+  }
 
   Future<void> sendMessageText(String chatId, String messageText) async {
     try {

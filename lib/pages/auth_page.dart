@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yap_zone/providers/auth_provider.dart';
 import 'package:yap_zone/providers/cloud_storage_provider.dart';
-import 'package:yap_zone/providers/database_provider.dart';
 import 'package:yap_zone/providers/navigator_provider.dart';
+import 'package:yap_zone/providers/user_provider.dart';
 import 'package:yap_zone/widgets/app_snackbar.dart';
 import 'package:yap_zone/widgets/hero_logo.dart';
 import 'package:yap_zone/widgets/inputs/input_form_field.dart';
@@ -44,7 +44,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
     final authService = ref.read(authServiceProvider);
-    final databaseService = ref.read(databaseServiceProvider);
+    final userService = ref.read(userServiceProvider);
     try {
       if (widget.authMode == AuthMode.signIn) {
         // Call sign in method
@@ -64,7 +64,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           );
           return;
         }
-        await databaseService.updateUserActivity(result.credential!.user!.uid);
+        await userService.updateUserActivity(result.credential!.user!.uid);
       } else {
         if (_pickedImage == null) {
           _showSnackBar(
@@ -106,7 +106,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
             .read(cloudStorageServiceProvider)
             .uploadUserImage(result.credential!.user!.uid, _pickedImage!);
 
-        await databaseService.saveUserData(
+        await userService.saveUserData(
           result.credential!.user!.uid,
           _emailAddress,
           _username,

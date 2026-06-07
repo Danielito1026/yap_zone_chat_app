@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yap_zone/models/user.dart';
-import 'package:yap_zone/providers/database_provider.dart';
 import 'package:yap_zone/providers/user_provider.dart';
 import 'package:yap_zone/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';

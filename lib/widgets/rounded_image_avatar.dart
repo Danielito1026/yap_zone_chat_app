@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 
 class RoundedImageAvatar extends StatelessWidget {
-  const RoundedImageAvatar({super.key
-  ,
-  this.avatarUrl = 'https://example.com/avatar.jpg',
-  this.isGroupChat = false,
-  this.isActive = false,});
+  const RoundedImageAvatar({
+    super.key,
+    this.avatarUrl = 'https://example.com/avatar.jpg',
+    this.isGroupChat = false,
+    this.isActive = false,
+    this.radius = 25,
+    this.indicatorSize = 12,
+  });
 
   final String avatarUrl;
   final bool isGroupChat;
-  final bool isActive; // Set to true for active users
+  final bool isActive;
+  final double radius;
+  final double indicatorSize;
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +23,13 @@ class RoundedImageAvatar extends StatelessWidget {
       backgroundImage: isGroupChat
           ? AssetImage(avatarUrl)
           : NetworkImage(avatarUrl),
-      radius: 25,
+      radius: radius,
       child: isActive
           ? Align(
               alignment: Alignment.bottomRight,
               child: Container(
-                width: 12,
-                height: 12,
+                width: indicatorSize,
+                height: indicatorSize,
                 decoration: BoxDecoration(
                   color: Colors.green,
                   shape: BoxShape.circle,

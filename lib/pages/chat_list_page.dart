@@ -11,20 +11,32 @@ class ChatListPage extends ConsumerStatefulWidget {
 }
 
 class _ChatListPageState extends ConsumerState<ChatListPage> {
-
-
   @override
   Widget build(BuildContext context) {
-    final userChatsAsync =  ref.watch(userChatsV2Provider);
-    return userChatsAsync.when(
-      data: (chats) {
-        if (chats.isEmpty) {
-          return Center(child: Text('No chats yet. Start a conversation!'),);
-        }
-        return ChatListView(chats: chats);
-      },
-      loading: () => Center(child: CircularProgressIndicator()),
-      error: (e, st) => Center(child: Text('Error loading chats:\n$e')),
+    final userChatsAsync = ref.watch(userChatsV2Provider);
+    return RefreshIndicator(
+      onRefresh: () async => ref.refresh(userChatsV2Provider),
+      child: Center(
+        child: userChatsAsync.when(
+          data: (chats) {
+            if (chats.isEmpty) {
+              return Text('No chats yet...');
+            }
+            return ChatListView(chats: chats);
+          },
+          error: (e, st) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Error loading chats'),
+              TextButton(
+                onPressed: () => ref.refresh(userChatsV2Provider),
+                child: Text('Retry'),
+              ),
+            ],
+          ),
+          loading: () => CircularProgressIndicator(),
+        ),
+      ),
     );
   }
 }

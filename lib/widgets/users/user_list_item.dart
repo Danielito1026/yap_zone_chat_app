@@ -8,6 +8,7 @@ class UserListItem extends StatelessWidget {
     required this.isActive,
     required this.username,
     required this.email,
+    this.isSelected = false,
     required this.onTap,
   });
 
@@ -15,6 +16,7 @@ class UserListItem extends StatelessWidget {
   final bool isActive;
   final String username;
   final String email;
+  final bool isSelected;
   final void Function() onTap;
 
   @override
@@ -27,6 +29,12 @@ class UserListItem extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
+      trailing: isSelected
+          ? Icon(
+              Icons.check_circle,
+              color: Theme.of(context).colorScheme.primary,
+            )
+          : null,
       subtitle: Text(email, maxLines: 1, overflow: TextOverflow.ellipsis),
       onTap: onTap,
     );

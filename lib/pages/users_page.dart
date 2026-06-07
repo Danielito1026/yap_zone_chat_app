@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yap_zone/models/user.dart';
 import 'package:yap_zone/providers/user_provider.dart';
 import 'package:yap_zone/widgets/users/user_list_view.dart';
 import 'package:yap_zone/widgets/users/user_search_bar.dart';
@@ -12,29 +13,46 @@ class UsersListPage extends ConsumerStatefulWidget {
 }
 
 class _UsersListPageState extends ConsumerState<UsersListPage> {
+  List<UserModel> _filterUsers(List<UserModel> users, String query) {
+    if (query.isEmpty) return users;
+
+    return users
+        .where(
+          (user) =>
+              user.username.toLowerCase().contains(query) ||
+              user.email.toLowerCase().contains(query) ||
+              user.name.toLowerCase().contains(query),
+        )
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(usersProvider);
+    final query = ref.watch(searchQueryProvider);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         spacing: 16,
         children: [
           UserSearchBar(),
-          // if (users.isEmpty) Center(child: Text('No other users around..')),
-          // Expanded(child: UserListView(users: users)),
           userAsync.when(
             data: (users) {
               if (users.isEmpty) {
                 return Center(child: Text('No users around...'));
               }
-              return UserListView(users: users);
+              return Expanded(
+                child: UserListView(users: _filterUsers(users, query)),
+              );
             },
-            error: (e, st) => Center(
-              child: Text(
-                'Some Error occurred: ${e.toString()}',
-                softWrap: true,
-              ),
+            error: (e, st) => Column(
+              children: [
+                Text('Error loading users'),
+                TextButton(
+                  onPressed: () => ref.refresh(usersProvider),
+                  child: Text('Retry'),
+                ),
+              ],
             ),
             loading: () => CircularProgressIndicator(),
           ),
