@@ -22,14 +22,14 @@ class Chat {
     this.messages = const [],
   }) : uid = uid ?? Uuid().v4(),
        currentUserId = currentUserId ?? '' {
-    _recipients =  members.where((user) => user.uid != currentUserId).toList();
+    _recipients = members.where((user) => user.uid != currentUserId).toList();
   }
 
   List<UserModel> get recipients => _recipients;
 
   String get displayName => isGroupChat
-      ? members.map((u) => u.name).join(', ')
-      : recipients.first.name;
+      ? members.map((u) => u.username).join(', ')
+      : recipients.first.username;
 
   String get displayImage => isGroupChat
       ? 'assets/images/group-chat-logo.png'

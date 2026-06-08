@@ -21,13 +21,15 @@ class UserModel {
     this.lastActive,
   }) : uid = uid ?? const Uuid().v4();
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool includeCreatedAt = false}) {
     return {
-      'uid': uid,
+      'name': name.isEmpty ? username : name,
       'username': username,
       'email': email,
       'image': imageUrl,
       'last_active': lastActive,
+      'updated_at': FieldValue.serverTimestamp(),
+      if (includeCreatedAt) 'created_at': FieldValue.serverTimestamp(),
     };
   }
 
@@ -36,9 +38,7 @@ class UserModel {
     DateTime? parseTimestamp(dynamic value) {
       if (value == null) return null;
       if (value is DateTime) return value;
-      // If it's a Firestore Timestamp object
       if (value is Timestamp) return value.toDate();
-      // If it's a Map (rare case)
       if (value is Map) {
         return DateTime.fromMillisecondsSinceEpoch(
           (value['seconds'] ?? 0) * 1000 +

@@ -33,16 +33,18 @@ class UserService {
     String uid,
     String email,
     String username,
-    String imageUrl,
-  ) async {
-    await _dbService.setDocument(
+    String imageUrl, {
+    bool isCreate = false,
+  }) async {
+    final model = UserModel(
+      name: username,
+      username: username,
+      email: email,
+      imageUrl: imageUrl,
+    );
+    await _dbService.setDocumentMap(
       uid,
-      UserModel(
-        name: username,
-        username: username,
-        email: email,
-        imageUrl: imageUrl,
-      ),
+      model.toMap(includeCreatedAt: isCreate),
     );
   }
 

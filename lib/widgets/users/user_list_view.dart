@@ -16,8 +16,11 @@ class UserListView extends ConsumerStatefulWidget {
 
 class _UserListViewState extends ConsumerState<UserListView> {
   Future<void> _onCreateChat() async {
-    final chatId = await ref.read(userActionProvider.notifier).createChat();
+    final userAction = ref.read(userActionProvider.notifier);
+
+    final chatId = await userAction.createChat();
     final chat = await ref.read(chatServiceV2Provider).getChatById(chatId!);
+    userAction.clearUsers();
     if (chat != null && mounted) {
       AppRoutes.openChat(context, chat);
     }
@@ -32,21 +35,33 @@ class _UserListViewState extends ConsumerState<UserListView> {
         ListView.builder(
           padding: EdgeInsets.symmetric(vertical: 16),
           itemCount: widget.users.length,
-          itemBuilder: (ctx, index) => UserListItem(
-            image: widget.users[index].imageUrl,
-            isActive: true,
-            username: widget.users[index].username,
-            email: widget.users[index].email,
-            onTap: () {
-              final user = widget.users[index];
-              if (userAction.contains(user)) {
-                ref.read(userActionProvider.notifier).removeUser(user.uid);
-              } else {
-                ref.read(userActionProvider.notifier).setUsers(user);
-              }
-            },
-            isSelected: userAction.contains(widget.users[index]),
-          ),
+          itemBuilder: (ctx, index) {
+            final user = widget.users[index];
+
+            return UserListItem(
+              image: widget.users[index].imageUrl,
+              isActive: true,
+              username: widget.users[index].username,
+              email: widget.users[index].email,
+              onTap: () {
+                if (userAction.isNotEmpty) {
+                  if (userAction.contains(user)) {
+                    ref.read(userActionProvider.notifier).removeUser(user.uid);
+                  } else {
+                    ref.read(userActionProvider.notifier).setUsers(user);
+                  }
+                }
+              },
+              onLongPress: () {
+                if (userAction.contains(user)) {
+                  ref.read(userActionProvider.notifier).removeUser(user.uid);
+                } else {
+                  ref.read(userActionProvider.notifier).setUsers(user);
+                }
+              },
+              isSelected: userAction.contains(widget.users[index]),
+            );
+          },
         ),
 
         if (userAction.isNotEmpty)

@@ -111,6 +111,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           _emailAddress,
           _username,
           userImageUrl,
+          isCreate: true
         );
       }
     } catch (e) {

@@ -10,6 +10,7 @@ class UserListItem extends StatelessWidget {
     required this.email,
     this.isSelected = false,
     required this.onTap,
+    required this.onLongPress,
   });
 
   final String image;
@@ -18,25 +19,29 @@ class UserListItem extends StatelessWidget {
   final String email;
   final bool isSelected;
   final void Function() onTap;
+  final void Function() onLongPress;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: RoundedImageAvatar(avatarUrl: image, isActive: isActive),
-      title: Text(
-        username,
-        style: TextStyle(fontWeight: FontWeight.bold),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: isSelected
-          ? Icon(
-              Icons.check_circle,
-              color: Theme.of(context).colorScheme.primary,
-            )
-          : null,
-      subtitle: Text(email, maxLines: 1, overflow: TextOverflow.ellipsis),
+    return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
+      child: ListTile(
+        leading: RoundedImageAvatar(avatarUrl: image, isActive: isActive),
+        title: Text(
+          username,
+          style: TextStyle(fontWeight: FontWeight.bold),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: isSelected
+            ? Icon(
+                Icons.check_circle,
+                color: Theme.of(context).colorScheme.primary,
+              )
+            : null,
+        subtitle: Text(email, maxLines: 1, overflow: TextOverflow.ellipsis),
+      ),
     );
   }
 }

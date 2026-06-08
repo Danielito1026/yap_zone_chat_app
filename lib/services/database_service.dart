@@ -293,6 +293,14 @@ class DatabaseService<T> {
     }
   }
 
+  Future<void> setDocumentMap(String docId, Map<String, dynamic> model) async {
+    try {
+      await _firestore.collection(collectionName).doc(docId).set(model);
+    } catch (e) {
+      print('Error setting document: $e');
+    }
+  }
+
   Future<void> updateDocument(
     String docId,
     Map<String, dynamic> updates,
